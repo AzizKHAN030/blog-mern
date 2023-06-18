@@ -79,6 +79,26 @@ export const getPostById = async (req, res) => {
     }
 };
 
+export const getTags = async (req, res) => {
+    try {
+        const postTags = await PostModel.find({}, 'tags').sort({ createdAt: -1 }).limit(5);
+
+        const tags = postTags.map((post) => post.tags)
+            .flat()
+            .filter((value, index, self) => self.indexOf(value) === index)
+            .slice(0, 5);
+
+        return res.json(tags);
+    } catch (error) {
+        console.log('error', error);
+
+        return res.status(500).json({
+            message: 'Something went wrong',
+            error,
+        });
+    }
+};
+
 export const deletePostById = async (req, res) => {
     try {
         const {
