@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 // import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { selectIsAuth, login } from '../../redux/slices/auth';
 
 import styles from './Login.module.scss';
@@ -29,15 +30,26 @@ export function Login() {
   });
   const dispatch = useDispatch();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     if (!isValid) {
       return;
     }
 
-    dispatch(login(data));
+    const authData = await dispatch(login(data));
+
+    if (!authData.payload) {
+      alert('Error while login');
+      return;
+    }
+
+    if ('token' in authData.payload) {
+      window.localStorage.setItem('token', authData.payload.token);
+    }
   };
 
-  console.log('>>>', isAuthenticated);
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
 
   return (
       <Paper classes={{ root: styles.root }}>
@@ -62,7 +74,7 @@ export function Login() {
                 {...register('password', { required: 'Enter your password' })}
                 fullWidth
               />
-              <Button type="submit" size="large" variant="contained" fullWidth>
+              <Button disabled={!isValid} type="submit" size="large" variant="contained" fullWidth>
                   Login
               </Button>
           </form>

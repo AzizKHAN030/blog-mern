@@ -1,4 +1,5 @@
 import PostModel from '../models/Post.js';
+import UserModel from '../models/User.js';
 
 export const createPost = async (req, res) => {
     try {
@@ -56,11 +57,15 @@ export const getPostById = async (req, res) => {
             },
         } = req;
 
-        const post = await PostModel.findOneAndUpdate(
-            { _id: id },
-            { $inc: { views: 1 } },
-            { returnDocument: 'after' },
-        ).populate('user').exec();
+        const post = await PostModel
+            .findOneAndUpdate(
+                { _id: id },
+                { $inc: { views: 1 } },
+                { returnDocument: 'after' },
+            )
+            .populate('user')
+            .populate('comments.user')
+            .exec();
 
         if (!post) {
             return res.status(404).json({
@@ -164,6 +169,72 @@ export const updatePostById = async (req, res) => {
         }).exec();
 
         return res.json({ success: true });
+    } catch (error) {
+        console.log('error', error);
+
+        return res.status(500).json({
+            message: 'Something went wrong',
+            error,
+        });
+    }
+};
+
+export const commentPostById = async (req, res) => {
+    try {
+        const {
+            params: {
+                id,
+            },
+            body: {
+                comment,
+            },
+            userId,
+        } = req;
+
+        const post = await PostModel
+            .findOneAndUpdate(
+                { _id: id },
+                { $inc: { commentsCount: 1 } },
+                { returnDocument: 'after' },
+            );
+        const user = await UserModel.findById(userId);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        post.comments.push({
+            text: comment,
+            user,
+        });
+
+        await post.save();
+
+        return res.json({ success: true });
+    } catch (error) {
+        console.log('error', error);
+
+        return res.status(500).json({
+            message: 'Something went wrong',
+            error,
+        });
+    }
+};
+
+export const getComments = async (req, res) => {
+    try {
+        const postComments = await PostModel
+            .find({}, 'comments')
+            .populate('comments.user')
+            .sort({ createdAt: -1 })
+            .limit(5);
+
+        const comments = postComments.map((post) => post.comments)
+            .flat()
+            .filter((value, index, self) => self.indexOf(value) === index)
+            .slice(0, 5);
+
+        return res.json(comments);
     } catch (error) {
         console.log('error', error);
 

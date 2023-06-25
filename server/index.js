@@ -14,6 +14,8 @@ import {
     deletePostById,
     updatePostById,
     getTags,
+    commentPostById,
+    getComments,
 } from './controllers/PostController.js';
 
 import checkAuth from './utils/checkAuth.js';
@@ -72,6 +74,8 @@ app.patch(
 app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
     res.json({ imageUrl: req.file.path });
 });
+app.post('/posts/comment/:id', checkAuth, commentPostById);
+app.get('/comments', getComments);
 
 app.listen(4444, (error) => {
     if (error) {

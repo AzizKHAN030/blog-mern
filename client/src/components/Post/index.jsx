@@ -8,10 +8,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import EyeIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import CommentIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import styles from './Post.module.scss';
 import { UserInfo } from '../UserInfo';
 import { PostSkeleton } from './Skeleton';
+import { fetchPostRemove } from '../../redux/slices/posts';
 
 export function Post({
   id,
@@ -31,13 +33,20 @@ export function Post({
     return <PostSkeleton />;
   }
 
-  const onClickRemove = () => {};
+    const dispatch = useDispatch();
+    const onClickRemove = () => {
+    const shouldDelete = window.confirm('Are you sure?');
+
+    if (shouldDelete) {
+      dispatch(fetchPostRemove(id));
+    }
+  };
 
   return (
       <div className={clsx(styles.root, { [styles.rootFull]: isFullPost })}>
           {isEditable && (
           <div className={styles.editButtons}>
-              <Link to={`/posts/${id}/edit`}>
+              <Link to={`/posts/edit/${id}`}>
                   <IconButton color="primary">
                       <EditIcon />
                   </IconButton>
@@ -50,7 +59,7 @@ export function Post({
           {imageUrl && (
           <img
             className={clsx(styles.image, { [styles.imageFull]: isFullPost })}
-            src={imageUrl}
+            src={`http://localhost:4444/${imageUrl}`}
             alt={title}
           />
       )}

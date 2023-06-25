@@ -13,7 +13,7 @@ import { SideBlock } from './SideBlock';
 
 export function CommentsBlock({ items, children, isLoading = true }) {
   return (
-      <SideBlock title="Комментарии">
+      <SideBlock title="Comments">
           <List>
               {(isLoading ? [...Array(5)] : items).map((obj, index) => (
                   <React.Fragment key={index}>
@@ -22,7 +22,7 @@ export function CommentsBlock({ items, children, isLoading = true }) {
                               {isLoading ? (
                                   <Skeleton variant="circular" width={40} height={40} />
                 ) : (
-                    <Avatar alt={obj.user.fullName} src={obj.user.avatarUrl} />
+                    <Avatar alt={obj.user.fullName} src={obj.user.profilePic} />
                 )}
                           </ListItemAvatar>
                           {isLoading ? (
